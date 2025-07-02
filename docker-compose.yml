@@ -1,0 +1,25 @@
+﻿version: '3.9'
+services:
+  app:
+    build: ../collabtasks-app
+  api:
+    build: ../collabtasks-api
+  redis:
+    image: redis
+    volumes:
+      - ./cache/redis.conf:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=example
+    volumes:
+      - ./database-sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+  mongo:
+    image: mongo
+    volumes:
+      - ./database-nosql/init.js:/docker-entrypoint-initdb.d/init.js
+  loki:
+    image: grafana/loki
+    volumes:
+      - ./logs/loki-config.yaml:/etc/loki/local-config.yaml
