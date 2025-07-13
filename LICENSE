@@ -1,4 +1,5 @@
-Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+🇧🇷 Português
+Licença: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
 Você é livre para:
 ✔ Compartilhar — copiar e redistribuir o material em qualquer formato
@@ -8,5 +9,27 @@ Sob as seguintes condições:
 📌 Atribuição — Você deve dar crédito ao autor original.
 🚫 Uso não comercial — Você não pode usar o material para fins comerciais.
 
+🔍 Nota de esclarecimento:
+Esta infraestrutura (como arquivos Docker, Docker Compose, scripts de inicialização, etc.) não pode ser vendida, licenciada, distribuída ou incluída em produtos comerciais sem autorização prévia.
+No entanto, o uso interno em projetos comerciais (ex: e-commerces, apps, startups) é permitido, desde que a infraestrutura em si não seja comercializada diretamente.
+
 Para mais detalhes, consulte a licença completa:
+https://creativecommons.org/licenses/by-nc/4.0/legalcode
+
+🌐 English
+License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+
+You are free to:
+✔ Share — copy and redistribute the material in any medium or format
+✔ Adapt — remix, transform, and build upon the material
+
+Under the following terms:
+📌 Attribution — You must give appropriate credit to the original author.
+🚫 NonCommercial — You may not use the material for commercial purposes.
+
+🔍 Clarification Note:
+This infrastructure (e.g., Docker files, Docker Compose configs, startup scripts, etc.) may not be sold, licensed, redistributed, or included in commercial products without prior permission.
+However, internal use in commercial projects (e.g., e-commerce sites, apps, startups) is allowed, as long as the infrastructure itself is not being commercialized.
+
+For full details, see the license:
 https://creativecommons.org/licenses/by-nc/4.0/legalcode
