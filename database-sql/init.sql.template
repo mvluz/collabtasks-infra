@@ -1,0 +1,63 @@
+-- Create read-only user
+CREATE USER ${READ_USER} WITH PASSWORD '${READ_PASSWORD}';
+
+-- Create write-only user
+CREATE USER ${WRITE_USER} WITH PASSWORD '${WRITE_PASSWORD}';
+
+-- Grant permissions to the read-only user
+GRANT CONNECT ON DATABASE ${POSTGRES_DB} TO ${READ_USER};
+GRANT USAGE ON SCHEMA public TO ${READ_USER};
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${READ_USER};
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO ${READ_USER};
+
+-- Grant permissions to the write-only user
+GRANT CONNECT ON DATABASE ${POSTGRES_DB} TO ${WRITE_USER};
+GRANT USAGE ON SCHEMA public TO ${WRITE_USER};
+GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${WRITE_USER};
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT INSERT, UPDATE, DELETE ON TABLES TO ${WRITE_USER};
+
+-- Create table for application users
+CREATE TABLE IF NOT EXISTS tbUsers (
+  id UUID PRIMARY KEY, 
+  displayName TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  photoUrl TEXT,
+  password TEXT,
+  passwordHash TEXT NOT NULL,
+  passwordSalt TEXT NOT NULL,
+  active BOOLEAN NOT NULL DEFAULT FALSE,
+  emailVerified BOOLEAN NOT NULL DEFAULT FALSE,
+  createdAt TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  createdBy UUID REFERENCES tbUsers(id),
+  modifiedAt TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  modifiedBy UUID REFERENCES tbUsers(id)
+);
+
+-- Index for quick filtering of active users (e.g., for login or user management)
+CREATE INDEX IF NOT EXISTS idx_tbUsers_active ON tbUsers(active);
+
+-- Index for filtering users who have verified their email (e.g., for access control)
+CREATE INDEX IF NOT EXISTS idx_tbUsers_emailVerified ON tbUsers(emailVerified);
+
+-- Create table for token management (e.g., email verification, password reset, etc.)
+CREATE TABLE IF NOT EXISTS tbTokens (
+  id UUID PRIMARY KEY,
+  userId UUID NOT NULL REFERENCES tbUsers(id) ON DELETE CASCADE,
+  type TEXT NOT NULL, -- Token type: e.g., 'email_verification', 'reset_password'
+  token TEXT NOT NULL UNIQUE,
+  expiresAt TIMESTAMP WITH TIME ZONE NOT NULL,
+  used BOOLEAN NOT NULL DEFAULT FALSE,
+  createdAt TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  createdBy UUID REFERENCES tbUsers(id),
+  modifiedAt TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  modifiedBy UUID REFERENCES tbUsers(id)
+);
+
+-- Index for filtering tokens by user (e.g., to fetch all tokens for a specific user)
+CREATE INDEX IF NOT EXISTS idx_tbTokens_userId ON tbTokens(userId);
+
+-- Index for filtering tokens by type (e.g., separate login vs reset tokens)
+CREATE INDEX IF NOT EXISTS idx_tbTokens_type ON tbTokens(type);
+
+-- Index to enable efficient expiration checks (e.g., when validating a token)
+CREATE INDEX IF NOT EXISTS idx_tbTokens_expiresAt ON tbTokens(expiresAt);

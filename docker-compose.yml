@@ -1,25 +1,55 @@
-﻿version: '3.9'
-services:
-  app:
-    build: ../collabtasks-app
-  api:
-    build: ../collabtasks-api
-  redis:
-    image: redis
+﻿services:
+  postgres-db:
+    # Build a custom PostgreSQL image from the Dockerfile in the database-sql folder
+    build:
+      context: .
+      dockerfile: /database-sql/Dockerfile
+
+    # Name of the image to be used or created
+    image: postgres:17
+
+    # Name of the running container
+    container_name: postgres-db
+
+    # Always restart the container if it crashes
+    restart: always
+
+    # Map port 5432 of the host to port 5432 of the container (PostgreSQL default)
+    ports:
+      - "5432:5432"
+
     volumes:
-      - ./cache/redis.conf:/usr/local/etc/redis/redis.conf
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-  postgres:
-    image: postgres
-    environment:
-      - POSTGRES_PASSWORD=example
-    volumes:
+      # Persist PostgreSQL data outside the container (to avoid data loss on container recreation)
+      - postgres-db-data:/var/lib/postgresql/data
+
+      # Mount the SQL script that initializes the tables and data
       - ./database-sql/init.sql:/docker-entrypoint-initdb.d/init.sql
-  mongo:
-    image: mongo
-    volumes:
-      - ./database-nosql/init.js:/docker-entrypoint-initdb.d/init.js
-  loki:
-    image: grafana/loki
-    volumes:
-      - ./logs/loki-config.yaml:/etc/loki/local-config.yaml
+
+      # Mount the shell script responsible for generating the init.sql from a template
+      - ./database-sql/init.sh:/docker-entrypoint-initdb.d/init.sh
+
+      # Mount the init.sql template that uses environment variables for dynamic configuration
+      - ./database-sql/init.sql.template:/docker-entrypoint-initdb.d/init.sql.template
+
+    # Set environment variables from .env or PowerShell script; used in init.sql.template
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      READ_USER: ${READ_USER}
+      READ_PASSWORD: ${READ_PASSWORD}
+      WRITE_USER: ${WRITE_USER}
+      WRITE_PASSWORD: ${WRITE_PASSWORD}
+
+    # Connect this service to the custom application network
+    networks:
+      - app_network
+
+# Define a Docker bridge network for inter-container communication
+networks:
+  app_network:
+    driver: bridge
+
+# Named volume to persist PostgreSQL data across container rebuilds
+volumes:
+  postgres-db-data:
