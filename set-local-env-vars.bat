@@ -19,5 +19,6 @@ for /f "usebackq tokens=1,* delims==" %%A in ("%envFile%") do (
 rem Change directory to where docker-compose.yml is located
 cd /d %~dp0
 
-rem Start containers
+rem Start the containers with --build to rebuild the image
+rem (needed to install gettext for the envsubst command after downloading the original image)
 docker-compose up --build -d
